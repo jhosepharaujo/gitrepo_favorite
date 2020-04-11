@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:get/get.dart';
 
 class AppWidget extends StatelessWidget {
   @override
@@ -9,7 +10,7 @@ class AppWidget extends StatelessWidget {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: MaterialApp(
-        navigatorKey: Modular.navigatorKey,
+        navigatorKey: Get.addKey(Modular.navigatorKey),
         debugShowCheckedModeBanner: false,
         title: 'Flutter Slidy',
         theme: ThemeData(

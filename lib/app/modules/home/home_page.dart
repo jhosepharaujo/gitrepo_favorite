@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gitrepo_favorite/app/shared/components/ItemCard.dart';
+import 'package:gitrepo_favorite/app/shared/models/repository_model.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'home_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,7 +16,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends ModularState<HomePage, HomeController> {
-  //use 'controller' variable to access controller
+  final _textController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+ 
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
+
+  void _validateAndSearch() {
+    if (_formKey.currentState.validate()) {
+      controller.create(_textController.text.toLowerCase());
+    }
+  }
+
+  @override
+  void dispose() {
+    Hive.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,34 +45,49 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
       width: size.width,
       height: size.height,
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xff7159c1), Color(0xff9B49c1)])),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                height: 80,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text('Repositórios',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold)),
-              ),
-              Row(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xff7159c1), Color(0xff9B49c1)],
+        ),
+      ),
+      child: _buildPage(),
+    );
+  }
+
+  Widget _buildPage() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+              height: 60,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text('Repositórios',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold)),
+            ),
+            Form(
+              key: _formKey,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
                     flex: 5,
                     child: TextFormField(
+                      controller: _textController,
+                      autofocus: false,
+                      validator: (value) =>
+                          value.isEmpty ? '* Informar um repositório' : null,
                       decoration: InputDecoration(
                           hintStyle: TextStyle(fontStyle: FontStyle.italic),
                           border: OutlineInputBorder(),
@@ -61,46 +99,51 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                   SizedBox(
                     width: 10,
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: ButtonTheme(
-                      height: 60,
-                      buttonColor: Color(0xff6bd4c1),
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        onPressed: () {
-                          FocusScope.of(context).requestFocus(new FocusNode());
-                        },
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.white,
-                        ),
+                  ButtonTheme(
+                    height: 55,
+                    minWidth: 50,
+                    buttonColor: Color(0xff6bd4c1),
+                    child: RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      onPressed: _validateAndSearch,
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: ListView(
-                    children: <Widget>[
-                      ItemCard(name: "flutter", description: "Flutter makes it easy and fast to build beautiful mobile apps. ", stars: "89.3k", forks: "11.9k",),
-                      ItemCard(name: "flutter", description: "Flutter makes it easy and fast to build beautiful mobile apps. ", stars: "89.3k", forks: "11.9k",),
-                      ItemCard(name: "flutter", description: "Flutter makes it easy and fast to build beautiful mobile apps. ", stars: "89.3k", forks: "11.9k",),
-                      ItemCard(name: "flutter", description: "Flutter makes it easy and fast to build beautiful mobile apps. ", stars: "89.3k", forks: "11.9k",),
-                      ItemCard(name: "flutter", description: "Flutter makes it easy and fast to build beautiful mobile apps. ", stars: "89.3k", forks: "11.9k",),
-                    ],
-                  ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: ValueListenableBuilder(
+                  valueListenable: Hive.box('repositories').listenable(),
+                  builder: (BuildContext context, Box box, Widget child) {
+                    return ListView.builder(
+                      itemCount: box.length,
+                      itemBuilder: (context, index) {
+                        final RepositoryModel model = box.getAt(index);
+                        return ItemCard(
+                          name: model.name,
+                          description: model.description,
+                          stars: model.watchers,
+                          forks: model.forks,
+                          url: model.htmlUrl,
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,11 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class ItemCard extends StatelessWidget {
+  final name, description, stars, forks, url;
 
-  final name, description, stars, forks;
+  const ItemCard({Key key, this.name, this.description, this.stars, this.forks, this.url})
+      : super(key: key);
 
-  const ItemCard({Key key, this.name, this.description, this.stars, this.forks}) : super(key: key);
+
+  Future<void> _launchInBrowser() async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +41,17 @@ class ItemCard extends StatelessWidget {
               Text(
                 "$name",
                 style: TextStyle(
-                    fontSize: 25,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 15),
-                child: Text(
-                    "$description",
+                child: Text("$description",
                     maxLines: 2,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 15, color: Colors.black54)),
+                    style: TextStyle(fontSize: 14, color: Colors.black54)),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,16 +82,28 @@ class ItemCard extends StatelessWidget {
                   print("Clicou");
                 },
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Icon(
                       Icons.sync,
                       color: Color(0xff7159c1),
                     ),
-                    Text("ATUALIZAR",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff7159c1)))
+                    Text(
+                      "ATUALIZAR",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff7159c1),
+                      ),
+                    ),
+                     Spacer(),
+                     InkWell(
+                       child: Icon(FontAwesomeIcons.github),
+                       onTap: (){
+                         _launchInBrowser();
+                       },
+                     )
+                    //IconButton(icon: Icon(FontAwesomeIcons.github), onPressed: (){})
                   ],
                 ),
               ),

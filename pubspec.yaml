@@ -1,5 +1,5 @@
 name: gitrepo_favorite
-description: A new Flutter project.
+description: App favorite github repositories. 
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -14,11 +14,17 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 scripts:
-  watch: "flutter packages pub run build_runner watch --delete-conflicting-outputs"
+  watch: "flutter pub run build_runner watch --delete-conflicting-outputs"
+  build: "flutter pub run build_runner build --delete-conflicting-outputs"
 dependencies:
+  path_provider: ^1.6.5
+  hive: ^1.4.1+1
+  hive_flutter: ^0.3.0+2
+  get: ^1.11.6
+  url_launcher: ^5.4.2
   font_awesome_flutter: ^8.8.1
   dio: ^3.0.9
   flutter_mobx: ^1.1.0
@@ -31,11 +37,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
 
 dev_dependencies:
+  hive_generator: ^0.7.0+2
   mockito: ^4.1.1
   mobx_codegen: ^1.0.3
   build_runner: ^1.8.0
   flutter_test:
     sdk: flutter
+
 
 
 # For information on the generic Dart part of this file, see the
@@ -50,8 +58,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  #assets:
+    # - assets/images/icon.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

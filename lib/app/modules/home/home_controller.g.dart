@@ -26,6 +26,13 @@ mixin _$HomeController on _HomeControllerBase, Store {
     }, _$valueAtom, name: '${_$valueAtom.name}_set');
   }
 
+  final _$createAsyncAction = AsyncAction('create');
+
+  @override
+  Future<bool> create(dynamic repository) {
+    return _$createAsyncAction.run(() => super.create(repository));
+  }
+
   final _$_HomeControllerBaseActionController =
       ActionController(name: '_HomeControllerBase');
 
